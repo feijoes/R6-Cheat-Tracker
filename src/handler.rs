@@ -149,12 +149,12 @@ pub async fn login_user_handler(
     )
     .unwrap();
 
-    let cookie = Cookie::build("token")
+    let cookie = Cookie::build(("token", &token))
         .path("/")
         .max_age(time::Duration::hours(1))
         .same_site(SameSite::Lax)
-        .http_only(true)
-        .build();
+        .http_only(true);
+        
 
     let mut response = Response::new(json!({"status": "success", "token": token}).to_string());
     response
