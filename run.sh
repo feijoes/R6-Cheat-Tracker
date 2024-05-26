@@ -14,7 +14,7 @@ compose(){
 # Stop Docker Compose services
 restart_db() {
     docker compose down
-    docker volume rm r6_cheat_tracker_progresDB
+    docker volume rm r6_cheat_tracker_r6_cheat_tracker_db
     docker compose up -d
     sqlx migrate run
 }

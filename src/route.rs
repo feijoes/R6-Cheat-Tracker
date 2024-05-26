@@ -9,7 +9,7 @@ use axum::{
 use crate::{
     handler::{
         get_me_handler, health_checker_handler, login_user_handler, logout_handler,
-        register_user_handler,
+        register_user_handler,upload
     },
     jwt_auth::auth,
     AppState,
@@ -29,6 +29,6 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
             "/api/users/me",
             get(get_me_handler)
                 .route_layer(middleware::from_fn_with_state(app_state.clone(), auth)),
-        )
+        ).route("/api/upload", post(upload))
         .with_state(app_state)
 }

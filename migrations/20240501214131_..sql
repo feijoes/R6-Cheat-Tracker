@@ -21,14 +21,3 @@ CREATE TABLE
 
 CREATE INDEX users_email_idx ON users (email);
 
-CREATE TABLE CheaterReports (
-    report_id INT AUTO_INCREMENT PRIMARY KEY,
-    reporter_id INT NOT NULL,
-    platform ENUM('pc', 'psn', 'xbox') NOT NULL,
-    cheater_ubisoft_account VARCHAR(255) NOT NULL,
-    plataform 
-    evidence_video_url VARCHAR(255) NOT NULL,
-    comments TEXT,
-    reported_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    verified BOOLEAN DEFAULT FALSE
-);

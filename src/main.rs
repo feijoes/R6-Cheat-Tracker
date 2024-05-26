@@ -4,6 +4,7 @@ mod jwt_auth;
 mod model;
 mod response;
 mod route;
+mod utils;
 
 use config::Config;
 use std::sync::Arc;

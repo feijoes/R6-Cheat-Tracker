@@ -1,11 +1,14 @@
 use std::sync::Arc;
+use std::{fs::File, path::PathBuf, io:: Write};
+use substring::Substring;
 
 use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use axum::{
-    extract::State,
+    extract::{State, Multipart},
     http::{header, Response, StatusCode},
     response::IntoResponse,
     Extension, Json,
+    body::Bytes
 };
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use jsonwebtoken::{encode, EncodingKey, Header};
@@ -16,6 +19,7 @@ use crate::{
     model::{LoginUserSchema, RegisterUserSchema, TokenClaims, User},
     response::FilteredUser,
     AppState,
+    utils::generate_video_name
 };
 
 pub async fn health_checker_handler() -> impl IntoResponse {
@@ -191,12 +195,48 @@ pub async fn get_me_handler(
     Ok(Json(json_response))
 }
 
+pub async fn upload(mut multipart: Multipart) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)>{
+
+    let cargo_manifest_dir: String = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+    let mut video_name: Option<String> = Option::None;
+
+    while let Some(field) = multipart.next_field().await.unwrap() {
+        let name: String = field.name().unwrap().to_string();
+        if name == "file" {
+            let data: Bytes = field.bytes().await.unwrap();
+            println!("File received with size of {} bytes", data.len());
+            video_name = Some(generate_video_name());
+            let mut file: File = File::create(PathBuf::from(cargo_manifest_dir).join("uploads").join(video_name.clone().unwrap())).unwrap();
+            match file.write_all(&data) {
+                Ok(_) => {
+                    println!("File uploaded successfully.");
+                },
+                Err(err) => {
+                    eprintln!("{}", err);
+                    let error_response = serde_json::json!({
+                        "status": "fail",
+                        "message": "Failed to save video"
+                    });
+                    return Err((StatusCode::BAD_REQUEST, Json(error_response)));
+                },
+            };
+            let _ = file.flush();
+            let _ = file.sync_all();
+            break;
+        }
+    }
+
+    let video_name: String = video_name.unwrap_or(String::from("[[Something went wrong]]"));
+    let response = Response::new(json!({"status":"success", "message":format!("Video uploaded successfully: ?watch={}", video_name.substring(0, video_name.len() - 4))}).to_string());
+    Ok(response)
+}
+
 fn filter_user_record(user: &User) -> FilteredUser {
     FilteredUser {
         id: user.id.to_string(),
         email: user.email.to_owned(),
         name: user.name.to_owned(),
-        photo: user.photo.to_owned(),
+        photo: user.photo.to_owned().unwrap_or("None".to_string()),
         role: user.role.to_owned(),
         verified: user.verified,
         createdAt: user.created_at.unwrap(),
