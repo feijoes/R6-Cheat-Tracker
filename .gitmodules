@@ -1,0 +1,3 @@
+[submodule "R6-API"]
+	path = R6-API
+	url = https://github.com/SwiftCODA/R6-API.git

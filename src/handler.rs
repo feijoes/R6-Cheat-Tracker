@@ -73,7 +73,7 @@ pub async fn register_user_handler(
         "INSERT INTO users (name,email,password) VALUES ($1, $2, $3) RETURNING *",
         body.name.to_string(),
         body.email.to_string().to_ascii_lowercase(),
-        hashed_password
+        hashed_password,
     )
     .fetch_one(&data.db)
     .await

@@ -5,6 +5,12 @@ dev() {
     docker compose up -d
 }
 
+compose(){
+    docker compose down
+    docker compose build
+    docker compose up -d
+}
+
 # Stop Docker Compose services
 restart_db() {
     docker compose down
@@ -24,7 +30,7 @@ migrate-down() {
 }
 
 # Start the server using cargo watch
-start-server() {
+runserver() {
     cargo watch -q -c -w src/ -x run
 }
 
@@ -54,5 +60,5 @@ install() {
 if [ "$1" ]; then
     "$@"
 else
-    echo "Usage: ./commands.sh {dev|restart_db|migrate-up|migrate-down|start-server|install}"
+    echo "Usage: ./commands.sh {dev|restart_db|migrate-up|migrate-down|runserver|install}"
 fi

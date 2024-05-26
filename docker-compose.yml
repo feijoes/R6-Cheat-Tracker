@@ -3,13 +3,13 @@ services:
   db:
     image: postgres:latest
     container_name: postgres
-    restart: always
     ports:
       - "5432:5432"
     volumes:
-      - db:/var/lib/postgresql/data
+      - r6_cheat_tracker_db:/var/lib/postgresql/data
     env_file:
       - ./.env
+
   pgAdmin:
     image: dpage/pgadmin4
     container_name: pgAdmin
@@ -17,6 +17,17 @@ services:
       - ./.env
     ports:
       - "5050:80"
-    
+    volumes:
+      - r6_cheat_tracker_db:/var/lib/pgadmin
+    user: '$UID:$GID'
+  node-app:
+    build:
+      context: R6-API    # Path to the directory containing Dockerfile
+    ports:
+      - "8080:8080" 
+    env_file:
+      - ./R6-API/.env
+
 volumes:
-  db:
+  r6_cheat_tracker_db:
+    driver: local
